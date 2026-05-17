@@ -2,29 +2,38 @@ import streamlit as st
 import pickle
 import pandas as pd
 
-# Load trained model
+# Load model
 model = pickle.load(open("model.pkl", "rb"))
 
-st.title("🚗 Accident Severity Prediction")
-st.write("Enter all 12 feature values and click Predict")
+# Page setup
+st.set_page_config(page_title="Accident Severity Predictor")
+st.title("🚗 Accident Severity Prediction App")
+st.write("Enter all accident details below:")
 
-# 12 input fields
-start_lat = st.number_input("Start_Lat", value=0.0)
-start_lng = st.number_input("Start_Lng", value=0.0)
-distance = st.number_input("Distance(mi)", value=0.0)
-temperature = st.number_input("Temperature(F)", value=0.0)
-humidity = st.number_input("Humidity(%)", value=0.0)
-pressure = st.number_input("Pressure(in)", value=0.0)
-visibility = st.number_input("Visibility(mi)", value=0.0)
-wind_speed = st.number_input("Wind_Speed(mph)", value=0.0)
-precipitation = st.number_input("Precipitation(in)", value=0.0)
-end_lat = st.number_input("End_Lat", value=0.0)
-end_lng = st.number_input("End_Lng", value=0.0)
-wind_chill = st.number_input("Wind_Chill(F)", value=0.0)
+# =========================
+# USER INPUTS (NO DEFAULT VALUES)
+# =========================
 
-# Predict button
-if st.button("Predict"):
-    # Create input DataFrame with the exact 12 columns used by the model
+start_lat = st.number_input("Start_Lat")
+start_lng = st.number_input("Start_Lng")
+distance = st.number_input("Distance(mi)")
+temperature = st.number_input("Temperature(F)")
+humidity = st.number_input("Humidity(%)")
+pressure = st.number_input("Pressure(in)")
+visibility = st.number_input("Visibility(mi)")
+wind_speed = st.number_input("Wind_Speed(mph)")
+precipitation = st.number_input("Precipitation(in)")
+end_lat = st.number_input("End_Lat")
+end_lng = st.number_input("End_Lng")
+wind_chill = st.number_input("Wind_Chill(F)")
+
+# =========================
+# PREDICTION
+# =========================
+
+if st.button("Predict Severity"):
+
+    # Create input dataframe
     new_data = pd.DataFrame([{
         "Start_Lat": start_lat,
         "Start_Lng": start_lng,
@@ -40,8 +49,22 @@ if st.button("Predict"):
         "Wind_Chill(F)": wind_chill
     }])
 
-    # Predict using the trained model
+    st.subheader("Input Data")
+    st.write(new_data)
+
+    # Prediction
     prediction = model.predict(new_data)
 
-    # Display result
-    st.success(f"Predicted Severity: {prediction[0]}")
+    severity = prediction[0]
+
+    st.success(f"Predicted Severity: {severity}")
+
+    # Interpretation
+    if severity == 1:
+        st.info("🟢 Low Severity Accident")
+    elif severity == 2:
+        st.warning("🟡 Moderate Severity Accident")
+    elif severity == 3:
+        st.warning("🟠 High Severity Accident")
+    elif severity == 4:
+        st.error("🔴 Very Severe Accident")
